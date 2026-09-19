@@ -1,14 +1,7 @@
 ﻿from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.api import incidents, remediation
 from app.core.config import settings
-from app.models.schemas import (
-    EvidencePackage,
-    RCAResult,
-    RemediationProposal,
-    ValidationReport,
-)
-from app.api import incidents  # <-- NEW IMPORT
 
 app = FastAPI(
     title="EventDoctor API",
@@ -25,9 +18,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# <-- REGISTER THE ROUTER HERE
+# REGISTER THE ROUTERS
 app.include_router(incidents.router)
-
+app.include_router(remediation.router)
 
 @app.get("/health")
 def health_check():
@@ -36,3 +29,7 @@ def health_check():
         "service": "eventdoctor-api",
         "region": settings.AWS_REGION,
     }
+
+@app.get("/")
+def root():
+    return {"status": "EventDoctor Backend is running live!"}
