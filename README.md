@@ -18,7 +18,6 @@ It combines:
 - Frontend: Next.js, React, TypeScript
 - Backend: FastAPI, Python
 - AWS: API Gateway, Lambda, Cognito, DynamoDB, S3, SQS, CloudWatch
-- AI: Amazon Nova Pro
 
 ## Run Locally
 
