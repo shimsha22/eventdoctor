@@ -1,4 +1,4 @@
-import type { Incident, IncidentSummary, ReviewSubmission } from "./types";
+import type { Incident, IncidentSummary, ReviewSubmission, Signal } from "./types";
 import {
   MOCK_INCIDENT,
   MOCK_VALIDATION,
@@ -35,7 +35,7 @@ function resetMock() {
 
 // ---------------------------------------------------------------- live calls
 
-async function call(path: string, init?: RequestInit): Promise<Incident> {
+async function call<T = Incident>(path: string, init?: RequestInit): Promise<T> {
   const token =
     typeof window !== "undefined" ? window.localStorage.getItem("ed_token") : null;
 
@@ -50,6 +50,9 @@ async function call(path: string, init?: RequestInit): Promise<Incident> {
 
   if (res.status === 403) {
     throw new Error("Your role is not allowed to do that.");
+  }
+  if (res.status === 401) {
+    throw new Error("Your Cognito session is missing or expired. Please sign in again.");
   }
   if (!res.ok) {
     throw new Error(`Backend returned ${res.status}. Is FastAPI running?`);
@@ -75,13 +78,7 @@ export const api = {
         headline: i.rca?.headline ?? null,
       }));
     }
-    const token =
-      typeof window !== "undefined" ? window.localStorage.getItem("ed_token") : null;
-    const res = await fetch(`${API_URL}/incidents`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    if (!res.ok) throw new Error(`Backend returned ${res.status}. Is FastAPI running?`);
-    return res.json();
+    return call<IncidentSummary[]>("/incidents", { method: "GET" });
   },
 
   async getIncident(id: string): Promise<Incident> {
@@ -93,6 +90,20 @@ export const api = {
       return structuredClone(other);
     }
     return call(`/incidents/${id}`);
+  },
+
+  async getLiveSignals(id: string): Promise<Signal[]> {
+    if (USE_MOCK) return structuredClone(mockIncident.signals);
+    const token = typeof window !== "undefined" ? window.localStorage.getItem("ed_token") : null;
+    const res = await fetch(`${API_URL}/incidents/${id}/signals`, {
+      cache: "no-store",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (res.status === 401) throw new Error("Your Cognito session is missing or expired. Please sign in again.");
+    if (res.status === 403) throw new Error("Your role is not allowed to do that.");
+    if (!res.ok) throw new Error(`Backend returned ${res.status}. Is the API Gateway running?`);
+    const payload = await res.json();
+    return payload.signals;
   },
 
   async submitReview(id: string, body: ReviewSubmission): Promise<Incident> {

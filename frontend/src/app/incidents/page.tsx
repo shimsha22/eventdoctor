@@ -58,7 +58,10 @@ export default function IncidentsPage() {
 
         <div className="mt-6">
           {items?.map((i, idx) => {
-            const stage = STAGE_LABEL[i.stage];
+            const stage = STAGE_LABEL[i.stage] ?? {
+              text: "Needs investigation",
+              cls: "bg-signal-soft text-signal",
+            };
             const needsYou =
               i.stage === "awaiting_engineer_review" ||
               i.stage === "awaiting_deploy_approval";

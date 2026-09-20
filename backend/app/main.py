@@ -12,7 +12,7 @@ app = FastAPI(
 # Enable CORS for local Next.js development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origin_regex=r"http://localhost:(3000|3001|3002)$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,6 +20,7 @@ app.add_middleware(
 
 # REGISTER THE ROUTERS
 app.include_router(incidents.router)
+app.include_router(incidents.compat_router)
 app.include_router(remediation.router)
 
 @app.get("/health")

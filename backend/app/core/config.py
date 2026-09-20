@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     SQS_DLQ_URL: str = ""
     GITHUB_TOKEN: str = ""
     GITHUB_REPO: str = ""
+    DEMO_MODE: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

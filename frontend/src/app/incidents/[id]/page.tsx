@@ -42,6 +42,24 @@ function Body() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    let active = true;
+    const refreshSignals = async () => {
+      try {
+        const signals = await api.getLiveSignals(incidentId);
+        if (active) setIncident((current) => current ? { ...current, signals } : current);
+      } catch {
+        // The incident view remains usable if a transient signal refresh fails.
+      }
+    };
+    refreshSignals();
+    const timer = window.setInterval(refreshSignals, 10000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [incidentId]);
+
   // Wraps every action so one failure can never leave a button stuck spinning.
   async function run(fn: () => Promise<Incident>) {
     setBusy(true);
@@ -193,7 +211,7 @@ function Body() {
               onApprove={() => run(() => api.approveDeploy(incidentId))}
             />
             <ValidationPanel report={incident.validation} />
-            {incident.replay.tied_to_incident > 0 && (
+            {(incident.replay.tied_to_incident > 0 || (incident.failed_event_samples?.length ?? 0) > 0) && (
               <ReplayPanel
                 incident={incident}
                 busy={busy}

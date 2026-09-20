@@ -77,7 +77,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      <div className="bg-card border border-line rounded-lg p-5">
+      {!usingCognito() && <div className="bg-card border border-line rounded-lg p-5">
         <h2 className="text-sm font-semibold m-0 mb-1">
           {usingCognito() ? "Or pick a role for the demo" : "Pick a role"}
         </h2>
@@ -101,7 +101,7 @@ export default function LoginPage() {
             </button>
           ))}
         </div>
-      </div>
+      </div>}
     </main>
   );
 }

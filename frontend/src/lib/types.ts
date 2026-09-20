@@ -107,6 +107,7 @@ export interface Incident {
   validation: ValidationReport | null;
   replay: ReplayStatus;
   signals: Signal[];
+  failed_event_samples?: Array<Record<string, unknown>>;
   deployed_version?: string;
   review_note?: string;
 }

@@ -2,16 +2,29 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth";
+import { useAuth, usingCognito } from "@/lib/auth";
 
-/** Sends anyone without a session to the login page. */
+/**
+ * In demo mode, automatically sign in as SRE so the console opens immediately.
+ * If Cognito is configured, keep the current login gate.
+ */
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { user, ready } = useAuth();
+  const { user, ready, signInAs } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (ready && !user) router.replace("/login");
-  }, [ready, user, router]);
+    if (!ready) return;
+
+    if (!user) {
+      if (usingCognito()) {
+        router.replace("/login");
+        return;
+      }
+
+      signInAs("SRE");
+      return;
+    }
+  }, [ready, user, router, signInAs]);
 
   if (!ready) return null;
   if (!user) return null;
