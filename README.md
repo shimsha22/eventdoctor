@@ -110,4 +110,3 @@ AWS mode requires:
 The local demo workflow uses simulated incident data and simulated deployment, validation, and replay actions.
 
 The AWS integration uses real AWS services for incident storage, evidence storage, queues, authentication, and live signals.
-``` 
